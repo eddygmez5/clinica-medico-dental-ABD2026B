@@ -1,0 +1,46 @@
+<%- include('../partials/header') %>
+
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card shadow-sm p-4" style="width: 100%; max-width: 450px;">
+            <h3 class="text-center mb-4">Registro de Personal</h3>
+
+            <% if (typeof error !=='undefined' && error) { %>
+                <div class="alert alert-danger">
+                    <%= error %>
+                </div>
+                <% } %>
+                    <% if (typeof mensaje !=='undefined' && mensaje) { %>
+                        <div class="alert alert-success">
+                            <%= mensaje %>
+                        </div>
+                        <% } %>
+
+                            <form action="/registro" method="POST">
+                                <div class="mb-3">
+                                    <label class="form-label">Nombre de Usuario</label>
+                                    <input type="text" class="form-control" name="nombre_usuario" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Correo Electrónico</label>
+                                    <input type="email" class="form-control" name="email" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Rol en la clínica</label>
+                                    <select class="form-select" name="rol" required>
+                                        <option value="Medico">Médico</option>
+                                        <option value="Recepcionista">Recepcionista</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Contraseña</label>
+                                    <input type="password" class="form-control" name="contrasena" required>
+                                </div>
+                                <button type="submit" class="btn btn-success w-100">Registrarse</button>
+                            </form>
+                            <div class="text-center mt-3">
+                                <a href="/" class="text-decoration-none small">Volver al inicio de sesión</a>
+                            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer') %>
