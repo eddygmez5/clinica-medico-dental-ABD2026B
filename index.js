@@ -9,6 +9,7 @@ const MySQLStore = require('express-mysql-session')(session);
 const db = require('./config/db');
 
 const authRoutes = require('./routes/auth');
+const pacientesRoutes = require('./routes/pacientes'); // <--- NUEVO
 const verificarSesion = require('./middleware/verificarSesion');
 
 const app = express();
@@ -41,6 +42,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/', authRoutes);
+app.use('/pacientes', pacientesRoutes); // <--- NUEVO
 
 // Ruta principal (Login)
 app.get('/', (req, res) => {
@@ -56,7 +58,7 @@ app.get('/dashboard', verificarSesion, (req, res) => {
     res.send(`
         <h1>¡Bienvenido, ${req.session.usuario.nombre}!</h1>
         <p>Tu rol es: ${req.session.usuario.rol}</p>
-        <a href="/logout">Cerrar Sesión</a>
+        <a href="/pacientes">Ir a Pacientes</a> | <a href="/logout">Cerrar Sesión</a>
     `);
 });
 
