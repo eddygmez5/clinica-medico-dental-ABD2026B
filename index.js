@@ -1,5 +1,5 @@
-//node npm run dev (en modo desarrollo)
-//node npm run start (en modo produccion)
+// npm run dev (en modo desarrollo)
+// npm start (en modo produccion)
 
 const express = require('express');
 const path = require('path');
@@ -10,6 +10,7 @@ const db = require('./config/db');
 
 const authRoutes = require('./routes/auth');
 const verificarSesion = require('./middleware/verificarSesion');
+const perfilRoutes = require('./routes/perfil');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -35,12 +36,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Ruta principal ahora muestra el login
-app.get('/', (req, res) => {
-    res.render('auth/login');
-});
-
+// Rutas de autenticación (login, logout, registro, recuperar)
 app.use('/', authRoutes);
+
+// Rutas de perfil (ver y actualizar perfil)
+app.use('/perfil', perfilRoutes);
 
 // Ruta principal (Login)
 app.get('/', (req, res) => {
@@ -52,12 +52,31 @@ app.get('/', (req, res) => {
 });
 
 // Ruta protegida del Dashboard
-app.get('/dashboard', verificarSesion, (req, res) => {
-    res.send(`
-        <h1>¡Bienvenido, ${req.session.usuario.nombre}!</h1>
-        <p>Tu rol es: ${req.session.usuario.rol}</p>
-        <a href="/logout">Cerrar Sesión</a>
-    `);
+app.get('/dashboard', verificarSesion, async (req, res) => {
+    try {
+        // Consultamos cuántas citas hay para la fecha de hoy (CURDATE())
+        const [citasHoy] = await db.query(
+            'SELECT COUNT(*) AS total FROM Cita WHERE fecha = CURDATE()'
+        );
+
+        // Consultamos el total de pacientes registrados
+        const [pacientes] = await db.query(
+            'SELECT COUNT(*) AS total FROM Paciente'
+        );
+
+        res.render('dashboard', {
+            usuario: req.session.usuario,
+            totalCitasHoy: citasHoy[0].total,
+            totalPacientes: pacientes[0].total
+        });
+    } catch (error) {
+        console.error('Error cargando dashboard:', error);
+        res.render('dashboard', {
+            usuario: req.session.usuario,
+            totalCitasHoy: 0,
+            totalPacientes: 0
+        });
+    }
 });
 
 app.listen(PORT, () => {
