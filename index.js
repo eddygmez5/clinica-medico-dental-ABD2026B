@@ -9,9 +9,10 @@ const MySQLStore = require('express-mysql-session')(session);
 const db = require('./config/db');
 
 const authRoutes = require('./routes/auth');
-const verificarSesion = require('./middleware/verificarSesion');
+const pacientesRoutes = require('./routes/pacientes');
 const perfilRoutes = require('./routes/perfil');
 const citasRoutes = require('./routes/citas');
+const verificarSesion = require('./middleware/verificarSesion');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -40,10 +41,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Rutas de autenticación (login, logout, registro, recuperar)
 app.use('/', authRoutes);
 
-// Rutas de perfil (ver y actualizar perfil)
+// Rutas de módulos principales
+app.use('/pacientes', pacientesRoutes);
 app.use('/perfil', perfilRoutes);
-
-// Rutas de citas (ver agenda, agendar, cancelar)
 app.use('/citas', citasRoutes);
 
 // Ruta principal (Login)
@@ -63,7 +63,6 @@ app.get('/dashboard', verificarSesion, async (req, res) => {
 
     try {
         if (usuario.rol === 'Medico') {
-            // Buscamos el pk_medico ligado a este usuario
             const [medico] = await db.query(
                 'SELECT pk_medico FROM Medico WHERE fk_usuario = ?',
                 [usuario.id]
@@ -76,11 +75,9 @@ app.get('/dashboard', verificarSesion, async (req, res) => {
                 );
                 totalCitasHoy = citasDoctor[0].total;
             } else {
-                // El médico registró cuenta pero aún no llena sus datos en /perfil
                 perfilIncompleto = true;
             }
         } else {
-            // Recepcionista ve todas las citas del día en toda la clínica
             const [citasClinica] = await db.query(
                 'SELECT COUNT(*) AS total FROM Cita WHERE fecha = CURDATE()'
             );
