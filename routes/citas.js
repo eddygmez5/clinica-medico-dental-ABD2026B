@@ -5,8 +5,10 @@ const verificarSesion = require('../middleware/verificarSesion');
 
 // 1. VER AGENDA DE CITAS (GET /citas)
 router.get('/', verificarSesion, async (req, res) => {
+    const usuario = req.session.usuario;
+
     try {
-        const [citas] = await db.query(`
+        let query = `
             SELECT 
                 c.pk_cita,
                 c.fecha,
@@ -21,11 +23,21 @@ router.get('/', verificarSesion, async (req, res) => {
             FROM Cita c
             INNER JOIN Paciente p ON c.fk_paciente = p.pk_paciente
             INNER JOIN Medico m ON c.fk_medico = m.pk_medico
-            ORDER BY c.fecha DESC, c.pk_cita DESC
-        `);
+        `;
+        let params = [];
+
+        // Si es Médico, filtramos para que solo vea SUS propias consultas
+        if (usuario.rol === 'Medico') {
+            query += ' WHERE m.fk_usuario = ?';
+            params.push(usuario.id);
+        }
+
+        query += ' ORDER BY c.fecha DESC, c.pk_cita DESC';
+
+        const [citas] = await db.query(query, params);
 
         res.render('citas/agenda', {
-            usuario: req.session.usuario,
+            usuario,
             citas,
             mensaje: req.query.exito || null
         });
@@ -35,8 +47,12 @@ router.get('/', verificarSesion, async (req, res) => {
     }
 });
 
-// 2. MOSTRAR FORMULARIO PARA AGENDAR (GET /citas/agendar)
+// 2. MOSTRAR FORMULARIO PARA AGENDAR (EXCLUSIVO RECEPCIONISTA)
 router.get('/agendar', verificarSesion, async (req, res) => {
+    if (req.session.usuario.rol !== 'Recepcionista') {
+        return res.redirect('/citas');
+    }
+
     try {
         const [pacientes] = await db.query('SELECT pk_paciente, nombre, apellido FROM Paciente ORDER BY nombre ASC');
         const [medicos] = await db.query('SELECT pk_medico, nombre, apellido, especialidad FROM Medico ORDER BY nombre ASC');
@@ -53,8 +69,12 @@ router.get('/agendar', verificarSesion, async (req, res) => {
     }
 });
 
-// 3. GUARDAR NUEVA CITA (POST /citas/agendar)
+// 3. GUARDAR NUEVA CITA (EXCLUSIVO RECEPCIONISTA)
 router.post('/agendar', verificarSesion, async (req, res) => {
+    if (req.session.usuario.rol !== 'Recepcionista') {
+        return res.redirect('/citas');
+    }
+
     const { fk_paciente, fk_medico, fecha, motivo_consulta, costo_total } = req.body;
 
     try {

@@ -11,15 +11,31 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/dashboard">Inicio</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/citas">Agenda / Citas</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/pacientes">Pacientes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/perfil">Mi Perfil</a>
-                </li>
+
+                <% if (typeof usuario !=='undefined' && usuario && usuario.rol==='Medico' ) { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/citas">Mis Consultas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pacientes">Expedientes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/perfil">Mi Perfil y Horarios</a>
+                    </li>
+                    <% } else { %>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/citas">Agenda General</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/citas/agendar">+ Agendar Cita</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/pacientes">Gestión de Pacientes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/perfil">Mi Perfil</a>
+                        </li>
+                        <% } %>
             </ul>
 
             <div class="d-flex align-items-center text-white">
