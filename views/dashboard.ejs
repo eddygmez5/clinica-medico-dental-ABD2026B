@@ -4,49 +4,74 @@
         <div class="container">
             <div class="row mb-4">
                 <div class="col">
-                    <h2 class="fw-bold">Panel Principal</h2>
+                    <h2 class="fw-bold">
+                        <%= usuario.rol==='Medico' ? 'Panel Médico' : 'Panel de Recepción' %>
+                    </h2>
                     <p class="text-muted">Bienvenido al sistema de gestión interno de la clínica.</p>
                 </div>
             </div>
 
-            <!-- Tarjetas de resumen rápido -->
-            <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <h6 class="text-muted text-uppercase small fw-bold">Citas Programadas Hoy</h6>
-                            <h2 class="display-5 fw-bold text-primary my-2">
-                                <%= totalCitasHoy %>
-                            </h2>
-                            <a href="/citas" class="btn btn-sm btn-outline-primary mt-2">Ver agenda completa</a>
-                        </div>
+            <% if (perfilIncompleto) { %>
+                <div class="alert alert-warning d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <strong>¡Falta tu ficha profesional!</strong> Para que puedan asignarte citas en la agenda,
+                        completa tus datos médicos.
                     </div>
+                    <a href="/perfil" class="btn btn-sm btn-dark">Completar Perfil Ahora</a>
                 </div>
+                <% } %>
 
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body">
-                            <h6 class="text-muted text-uppercase small fw-bold">Pacientes Registrados</h6>
-                            <h2 class="display-5 fw-bold text-success my-2">
-                                <%= totalPacientes %>
-                            </h2>
-                            <a href="/pacientes" class="btn btn-sm btn-outline-success mt-2">Gestionar pacientes</a>
+                    <!-- Tarjetas de resumen rápido -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="text-muted text-uppercase small fw-bold">
+                                        <%= usuario.rol==='Medico' ? 'Mis Citas Programadas Hoy'
+                                            : 'Citas de Hoy (Clínica)' %>
+                                    </h6>
+                                    <h2 class="display-5 fw-bold text-primary my-2">
+                                        <%= totalCitasHoy %>
+                                    </h2>
+                                    <a href="/citas" class="btn btn-sm btn-outline-primary mt-2">
+                                        <%= usuario.rol==='Medico' ? 'Ver mi agenda' : 'Ver agenda general' %>
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100 bg-light">
-                        <div class="card-body">
-                            <h6 class="text-muted text-uppercase small fw-bold">Acciones Rápidas</h6>
-                            <div class="d-grid gap-2 mt-3">
-                                <a href="/citas/agendar" class="btn btn-primary">+ Agendar Nueva Cita</a>
-                                <a href="/perfil" class="btn btn-secondary">Completar / Editar Mi Perfil</a>
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100">
+                                <div class="card-body">
+                                    <h6 class="text-muted text-uppercase small fw-bold">Pacientes Registrados</h6>
+                                    <h2 class="display-5 fw-bold text-success my-2">
+                                        <%= totalPacientes %>
+                                    </h2>
+                                    <a href="/pacientes" class="btn btn-sm btn-outline-success mt-2">
+                                        <%= usuario.rol==='Medico' ? 'Consultar expedientes' : 'Gestionar pacientes' %>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="card border-0 shadow-sm h-100 bg-light">
+                                <div class="card-body">
+                                    <h6 class="text-muted text-uppercase small fw-bold">Acciones Rápidas</h6>
+                                    <div class="d-grid gap-2 mt-3">
+                                        <% if (usuario.rol==='Recepcionista' ) { %>
+                                            <a href="/citas/agendar" class="btn btn-primary">+ Agendar Nueva Cita</a>
+                                            <a href="/pacientes" class="btn btn-outline-success">+ Registrar
+                                                Paciente</a>
+                                            <% } else { %>
+                                                <a href="/citas" class="btn btn-primary">Atender Consultas de Hoy</a>
+                                                <a href="/perfil" class="btn btn-secondary">Mi Perfil y Especialidad</a>
+                                                <% } %>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
         </div>
 
         <%- include('partials/footer') %>

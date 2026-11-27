@@ -1,0 +1,80 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar') %>
+
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm p-4">
+                        <h3 class="fw-bold mb-1">Agendar Nueva Cita</h3>
+                        <p class="text-muted small mb-4">Selecciona el paciente, médico tratante y fecha de consulta.
+                        </p>
+
+                        <% if (pacientes.length===0 || medicos.length===0) { %>
+                            <div class="alert alert-warning">
+                                <strong>Atención:</strong> Para agendar una cita necesitas tener al menos un
+                                <strong>Médico</strong> (en <a href="/perfil">Mi Perfil</a>) y un
+                                <strong>Paciente</strong> registrado en el sistema.
+                            </div>
+                            <% } %>
+
+                                <form action="/citas/agendar" method="POST">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Paciente</label>
+                                            <select name="fk_paciente" class="form-select" required>
+                                                <option value="">-- Selecciona un paciente --</option>
+                                                <% pacientes.forEach(p=> { %>
+                                                    <option value="<%= p.pk_paciente %>">
+                                                        <%= p.nombre %>
+                                                            <%= p.apellido %>
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Médico</label>
+                                            <select name="fk_medico" class="form-select" required>
+                                                <option value="">-- Selecciona un médico --</option>
+                                                <% medicos.forEach(m=> { %>
+                                                    <option value="<%= m.pk_medico %>">
+                                                        Dr(a). <%= m.nombre %>
+                                                            <%= m.apellido %> (<%= m.especialidad.replace('_', ' ' ) %>)
+                                                    </option>
+                                                    <% }) %>
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Fecha de la Cita</label>
+                                            <input type="date" name="fecha" class="form-control" required>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label class="form-label">Costo Estimado ($)</label>
+                                            <input type="number" step="0.01" name="costo_total" class="form-control"
+                                                placeholder="0.00" value="0.00">
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Motivo de Consulta</label>
+                                            <textarea name="motivo_consulta" class="form-control" rows="3"
+                                                placeholder="Ej. Limpieza dental, dolor molar, revisión general..."
+                                                required></textarea>
+                                        </div>
+
+                                        <div class="col-12 mt-4">
+                                            <button type="submit" class="btn btn-primary" <%=(pacientes.length===0 ||
+                                                medicos.length===0) ? 'disabled' : '' %>>
+                                                Confirmar Cita
+                                            </button>
+                                            <a href="/citas" class="btn btn-outline-secondary ms-2">Cancelar</a>
+                                        </div>
+                                    </div>
+                                </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <%- include('../partials/footer') %>

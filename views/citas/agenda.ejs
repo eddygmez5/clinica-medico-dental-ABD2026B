@@ -1,0 +1,152 @@
+<%- include('../partials/header') %>
+    <%- include('../partials/navbar') %>
+
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="fw-bold mb-0">Agenda de Citas</h2>
+                    <p class="text-muted small mb-0">Control de consultas médicas y dentales</p>
+                </div>
+                <a href="/citas/agendar" class="btn btn-primary">+ Agendar Nueva Cita</a>
+            </div>
+
+            <% if (mensaje) { %>
+                <div class="alert alert-success alert-dismissible fade show">
+                    <%= mensaje %>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <% } %>
+
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Paciente</th>
+                                            <th>Médico / Especialidad</th>
+                                            <th>Motivo</th>
+                                            <th>Costo</th>
+                                            <th>Estado</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% if (citas.length===0) { %>
+                                            <tr>
+                                                <td colspan="7" class="text-center py-4 text-muted">
+                                                    No hay citas registradas todavía.
+                                                </td>
+                                            </tr>
+                                            <% } %>
+
+                                                <% citas.forEach(cita=> { %>
+                                                    <tr>
+                                                        <td class="fw-semibold">
+                                                            <%= new Date(cita.fecha).toISOString().split('T')[0] %>
+                                                        </td>
+                                                        <td>
+                                                            <%= cita.paciente_nombre %><br>
+                                                                <small class="text-muted">
+                                                                    <%= cita.paciente_telefono || 'Sin tel.' %>
+                                                                </small>
+                                                        </td>
+                                                        <td>
+                                                            Dr(a). <%= cita.medico_nombre %><br>
+                                                                <small class="text-muted text-capitalize">
+                                                                    <%= cita.especialidad.replace('_', ' ' ) %>
+                                                                </small>
+                                                        </td>
+                                                        <td>
+                                                            <%= cita.motivo_consulta %>
+                                                        </td>
+                                                        <td>$<%= Number(cita.costo_total || 0).toFixed(2) %>
+                                                        </td>
+                                                        <td>
+                                                            <% if (cita.estado==='agendada' ) { %>
+                                                                <span class="badge bg-warning text-dark">Agendada</span>
+                                                                <% } else if (cita.estado==='atendida' ) { %>
+                                                                    <span class="badge bg-success">Atendida</span>
+                                                                    <% } else { %>
+                                                                        <span class="badge bg-danger">Cancelada</span>
+                                                                        <% } %>
+                                                        </td>
+                                                        <td>
+                                                            <button class="btn btn-sm btn-outline-primary"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#modalCita<%= cita.pk_cita %>">
+                                                                Gestionar
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                    <!-- Modal para actualizar estado y notas de la consulta -->
+                                                    <div class="modal fade" id="modalCita<%= cita.pk_cita %>"
+                                                        tabindex="-1">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <form action="/citas/actualizar/<%= cita.pk_cita %>"
+                                                                    method="POST">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Gestionar Cita #<%=
+                                                                                cita.pk_cita %>
+                                                                        </h5>
+                                                                        <button type="button" class="btn-close"
+                                                                            data-bs-dismiss="modal"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <p class="small text-muted mb-3">
+                                                                            <strong>Paciente:</strong>
+                                                                            <%= cita.paciente_nombre %><br>
+                                                                                <strong>Motivo:</strong>
+                                                                                <%= cita.motivo_consulta %>
+                                                                        </p>
+
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label fw-semibold">Estado
+                                                                                de la cita</label>
+                                                                            <select name="estado" class="form-select">
+                                                                                <option value="agendada"
+                                                                                    <%=cita.estado==='agendada'
+                                                                                    ? 'selected' : '' %>>Agendada
+                                                                                </option>
+                                                                                <option value="atendida"
+                                                                                    <%=cita.estado==='atendida'
+                                                                                    ? 'selected' : '' %>>Atendida
+                                                                                </option>
+                                                                                <option value="cancelada"
+                                                                                    <%=cita.estado==='cancelada'
+                                                                                    ? 'selected' : '' %>>Cancelada
+                                                                                </option>
+                                                                            </select>
+                                                                        </div>
+
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label fw-semibold">Notas
+                                                                                médicas / Observaciones</label>
+                                                                            <textarea name="notas" class="form-control"
+                                                                                rows="3"
+                                                                                placeholder="Diagnóstico, tratamiento realizado o motivo de cancelación..."><%= cita.notas || '' %></textarea>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary"
+                                                                            data-bs-dismiss="modal">Cerrar</button>
+                                                                        <button type="submit"
+                                                                            class="btn btn-primary">Guardar
+                                                                            Cambios</button>
+                                                                    </div>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+        </div>
+
+        <%- include('../partials/footer') %>
